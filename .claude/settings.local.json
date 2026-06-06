@@ -1,0 +1,1 @@
+{\n  "model": "claude-sonnet-4-6",\n  "permissions": {\n    "allow": [\n      "mcp__github__get_me",\n      "mcp__github__create_repository",\n      "mcp__github__push_files",\n      "mcp__github__get_file_contents",\n      "mcp__github__create_or_update_file"\n    ]\n  }\n}

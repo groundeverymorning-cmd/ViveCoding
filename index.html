@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메모장</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* 🖤✨ CHANEL STYLE - 명품 분위기 */
+        :root {
+            --primary: #d4af37;
+            --bg-dark: #0f0f0f;
+            --text-light: #f5f5f5;
+            --border: #333333;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', 'Playfair Display', serif;
+            background: #000000;
+            background-image:
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(212, 175, 55, 0.03) 2px,
+                    rgba(212, 175, 55, 0.03) 4px
+                );
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 550px;
+            background: #1a1a1a;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
+            padding: 0;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-size: 38px;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 40px 24px 32px;
+            border-bottom: 2px solid var(--primary);
+            color: var(--primary);
+            word-spacing: 1000px;
+        }
+
+        .status {
+            position: static !important;
+            width: auto !important;
+            height: auto !important;
+            padding: 14px 24px !important;
+            margin: 16px 24px 0 !important;
+            border: 1px solid var(--primary);
+            border-left: 3px solid var(--primary);
+            background: rgba(212, 175, 55, 0.08);
+            color: var(--primary);
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+            display: block !important;
+            overflow: visible !important;
+            clip: auto !important;
+            white-space: normal !important;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .status.error {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border-left-color: #ff6b6b;
+        }
+
+        .status.success {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            padding: 32px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-bottom: 2px solid var(--primary);
+            background: #0f0f0f;
+            color: var(--text-light);
+            font-family: 'Georgia', serif;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            min-height: 44px;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder {
+            color: #666666;
+            letter-spacing: 0.5px;
+        }
+
+        input:focus {
+            outline: none;
+            border-bottom-color: var(--primary);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            background: #1a1a1a;
+        }
+
+        button {
+            padding: 14px 28px;
+            background: var(--primary);
+            color: #000000;
+            border: none;
+            font-family: 'Georgia', serif;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            min-height: 44px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+        }
+
+        button:hover:not(:disabled) {
+            background: #e5c158;
+            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #555555;
+            color: #999999;
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+        }
+
+        .memos {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 24px;
+        }
+
+        .memo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            background: #0f0f0f;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .memo::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .memo:hover {
+            background: #1a1a1a;
+            border-left-color: #e5c158;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+        }
+
+        .memo:hover::after {
+            opacity: 1;
+        }
+
+        .memo-text {
+            flex: 1;
+            color: var(--text-light);
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            line-height: 1.6;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 8px 16px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            font-family: 'Georgia', serif;
+        }
+
+        .delete-btn:hover {
+            background: var(--primary);
+            color: #000000;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 80px 40px;
+            color: #666666;
+            font-style: italic;
+            letter-spacing: 1px;
+            font-size: 16px;
+        }
+
+        /* 접근성: Screen reader only content */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* 삭제 확인 모달 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 2px solid var(--primary);
+            border-radius: 0;
+            padding: 40px 32px;
+            min-width: 320px;
+            max-width: 520px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+            animation: slideUp 0.3s ease-out;
+            letter-spacing: 0.5px;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: var(--primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .modal-text {
+            font-size: 13px;
+            color: #999999;
+            margin-bottom: 32px;
+            line-height: 1.6;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-actions button {
+            padding: 12px 24px;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Georgia', serif;
+            min-height: auto;
+            box-shadow: none;
+        }
+
+        .modal-actions .cancel-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .modal-actions .cancel-btn:hover {
+            background: var(--primary);
+            color: #000000;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .modal-actions .confirm-btn {
+            background: var(--primary);
+            color: #000000;
+            border: 1px solid var(--primary);
+        }
+
+        .modal-actions .confirm-btn:hover {
+            background: #e5c158;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* 접근성: 포커스 인디케이터 */
+        button:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* 모바일 반응형 (480px 이하) */
+        @media (max-width: 480px) {
+            body {
+                padding: 30px 16px;
+            }
+
+            .container {
+                max-width: 100%;
+                border: 1px solid var(--primary);
+            }
+
+            h1 {
+                font-size: 28px;
+                letter-spacing: 2px;
+                padding: 30px 20px 24px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                padding: 24px 20px;
+                gap: 12px;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px 16px;
+            }
+
+            .memos {
+                padding: 20px;
+            }
+
+            .memo {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .memo-text {
+                width: 100%;
+            }
+
+            .delete-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .status {
+                margin: 12px 16px 0;
+                padding: 12px 16px;
+                font-size: 11px;
+            }
+
+            .modal-content {
+                padding: 32px 24px;
+                max-width: calc(100vw - 32px);
+            }
+        }
+
+        /* 태블릿 반응형 (481px ~ 768px) */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .container {
+                max-width: 95%;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+        }
+
+        /* 데스크톱 (769px 이상) */
+        @media (min-width: 769px) {
+            body {
+                padding: 60px 20px;
+            }
+
+            .container {
+                max-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>메모</h1>
+
+        <!-- 🎯 접근성: 상태 메시지 - role="alert" 추가 -->
+        <output id="status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></output>
+
+        <div class="input-group">
+            <!-- 🎯 접근성: 입력창 레이블 추가 (화면 리더용) -->
+            <label for="memoInput" class="sr-only">메모 내용</label>
+            <input
+                type="text"
+                id="memoInput"
+                placeholder="메모 추가..."
+                autocomplete="off"
+                aria-describedby="memo-help"
+            >
+            <!-- 🎯 접근성: 도움말 텍스트 -->
+            <span id="memo-help" class="sr-only">메모를 입력하고 추가 버튼을 누르거나 Enter를 누르세요</span>
+
+            <button id="addBtn" aria-label="메모 추가">추가</button>
+        </div>
+
+        <!-- 🎯 접근성: 메모 목록 role 추가 -->
+        <div class="memos" id="memosList" role="list" aria-label="메모 목록"></div>
+    </div>
+
+    <!-- 🎯 디자인: 삭제 확인 모달 -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-title">메모를 삭제하시겠습니까?</div>
+            <div class="modal-text">이 작업은 되돌릴 수 없습니다.</div>
+            <div class="modal-actions">
+                <button class="cancel-btn" id="cancelBtn">취소</button>
+                <button class="confirm-btn" id="confirmBtn">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 설정 (⚠️ 본 환경에서는 환경변수로 관리: process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
+        const SUPABASE_URL = 'https://zzefmhesoxbvrfqdvcuh.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_A46fGSuL4_A5FUEqWws_HQ_M2NzkDkn';
+
+        // DOM 요소
+        const memoInput = document.getElementById('memoInput');
+        const addBtn = document.getElementById('addBtn');
+        const memosList = document.getElementById('memosList');
+        const statusDiv = document.getElementById('status');
+
+        // 상태 변수
+        let sbClient = null;
+        let memoList = [];
+        let loading = false;
+        let pendingDeleteId = null;  // 🎯 디자인: 모달에서 삭제 대기 중인 ID
+
+        console.log('=== 메모 앱 시작 ===');
+
+        // Supabase 초기화
+        async function init() {
+            try {
+                console.log('Supabase 초기화 중...');
+
+                if (!window.supabase) {
+                    throw new Error('Supabase 라이브러리 로드 실패');
+                }
+
+                sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase 클라이언트 생성 완료');
+
+                // 테이블 접근 테스트
+                const { data, error } = await sbClient
+                    .from('memos')
+                    .select('count', { count: 'exact' })
+                    .limit(1);
+
+                if (error) {
+                    console.error('❌ 테이블 접근 실패:', error.message);
+                    showStatus('테이블 접근 실패: ' + error.message, 'error');
+                    return;
+                }
+
+                console.log('✅ memos 테이블 접근 성공');
+                showStatus('✅ Supabase 연결 완료', 'success');
+
+                loadMemoList();
+            } catch (err) {
+                console.error('❌ 초기화 실패:', err.message);
+                showStatus('초기화 실패: ' + err.message, 'error');
+            }
+        }
+
+        // 메시지 표시 (🎯 접근성: aria-live로 자동 알림)
+        function showStatus(msg, type) {
+            statusDiv.innerHTML = msg;
+            statusDiv.className = type;
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.innerHTML = '';
+                    statusDiv.className = '';
+                }, 2000);
+            }
+        }
+
+        // 메모 목록 로드
+        async function loadMemoList() {
+            if (!sbClient) return;
+
+            try {
+                console.log('메모 조회 중...');
+                const { data, error } = await sbClient
+                    .from('memos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                memoList = data || [];
+                console.log('✅ 메모 조회 완료:', memoList.length, '개');
+                renderList();
+            } catch (err) {
+                console.error('❌ 조회 실패:', err.message);
+                showStatus('조회 실패: ' + err.message, 'error');
+            }
+        }
+
+        // 메모 목록 렌더링
+        function renderList() {
+            if (memoList.length === 0) {
+                memosList.innerHTML = '<div class="empty">메모가 없습니다</div>';
+                return;
+            }
+
+            // 🎯 접근성: role="listitem" 추가
+            memosList.innerHTML = memoList.map(item => `
+                <div class="memo" role="listitem">
+                    <span class="memo-text">${escapeHTML(item.content)}</span>
+                    <button class="delete-btn" data-id="${item.id}" aria-label="메모 삭제: ${escapeHTML(item.content).substring(0, 20)}...">삭제</button>
+                </div>
+            `).join('');
+
+            // 🎯 이벤트 위임: 모든 삭제 버튼에 리스너 추가
+            memosList.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.target.dataset.id);
+                    deleteMemoItem(id);
+                });
+            });
+        }
+
+        // 메모 추가
+        async function addMemo() {
+            if (loading || !sbClient) return;
+
+            const text = memoInput.value.trim();
+            if (!text) return;
+
+            loading = true;
+            addBtn.disabled = true;
+            // 🎯 로딩 상태 시각화
+            const originalText = addBtn.textContent;
+            addBtn.textContent = '추가 중...';
+
+            try {
+                console.log('메모 추가 중...');
+                const { error } = await sbClient
+                    .from('memos')
+                    .insert([{ content: text }]);
+
+                if (error) throw error;
+
+                console.log('✅ 메모 추가 완료');
+                memoInput.value = '';
+                showStatus('✅ 추가됨', 'success');
+                await loadMemoList();
+                memoInput.focus();
+            } catch (err) {
+                console.error('❌ 추가 실패:', err.message);
+                showStatus('❌ 추가 실패: ' + err.message, 'error');
+            } finally {
+                loading = false;
+                addBtn.disabled = false;
+                // 🎯 원래 텍스트로 복원
+                addBtn.textContent = originalText;
+            }
+        }
+
+        // 메모 삭제
+        function deleteMemoItem(id) {
+            if (!sbClient || loading) return;
+
+            // 🎯 디자인: 모달 표시로 변경
+            pendingDeleteId = id;
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal.classList.add('show');
+        }
+
+        // 🎯 디자인: 실제 삭제 실행
+        async function executeDelete() {
+            if (!sbClient || loading || !pendingDeleteId) return;
+
+            const id = pendingDeleteId;
+            loading = true;
+            const deleteBtn = document.querySelector(`[data-id="${id}"]`);
+            if (deleteBtn) {
+                deleteBtn.disabled = true;
+                deleteBtn.textContent = '삭제 중...';
+            }
+
+            try {
+                console.log('메모 삭제 중, ID:', id);
+                const { error } = await sbClient
+                    .from('memos')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                console.log('✅ 메모 삭제 완료');
+                showStatus('✅ 삭제됨', 'success');
+                await loadMemoList();
+            } catch (err) {
+                console.error('❌ 삭제 실패:', err.message);
+                showStatus('❌ 삭제 실패: ' + err.message, 'error');
+                if (deleteBtn) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = '삭제';
+                }
+            } finally {
+                loading = false;
+                pendingDeleteId = null;
+                hideDeleteModal();
+            }
+        }
+
+        // 🎯 디자인: 모달 열기/닫기
+        function hideDeleteModal() {
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal.classList.remove('show');
+        }
+
+        // XSS 방지
+        function escapeHTML(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 이벤트 리스너
+        addBtn.addEventListener('click', addMemo);
+        memoInput.addEventListener('keypress', (e) => {
+            // 🎯 로딩 중에는 Enter 키 무시
+            if (e.key === 'Enter' && !loading) addMemo();
+        });
+
+        // 🎯 디자인: 모달 버튼 이벤트
+        document.getElementById('cancelBtn').addEventListener('click', hideDeleteModal);
+        document.getElementById('confirmBtn').addEventListener('click', executeDelete);
+        document.getElementById('deleteModal').addEventListener('click', (e) => {
+            // 모달 배경 클릭 시 닫기
+            if (e.target.id === 'deleteModal') hideDeleteModal();
+        });
+
+        // 페이지 로드 완료 후 초기화
+        init();
+    </script>
+</body>
+</html>
