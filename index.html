@@ -3,257 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>메모장</title>
+    <title>메모패드</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* 🖤✨ CHANEL STYLE - 명품 분위기 */
+        /* NAVER STYLE */
         :root {
-            --primary: #d4af37;
-            --bg-dark: #0f0f0f;
-            --text-light: #f5f5f5;
-            --border: #333333;
+            --primary: #03c75a;
+            --primary-dark: #02b350;
+            --primary-light: #e8f9f0;
+            --text-dark: #1a1a1a;
+            --text-gray: #666666;
+            --text-light: #999999;
+            --border: #e5e5e5;
+            --bg: #f7f8fb;
+            --white: #ffffff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Georgia', 'Playfair Display', serif;
-            background: #000000;
-            background-image:
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(212, 175, 55, 0.03) 2px,
-                    rgba(212, 175, 55, 0.03) 4px
-                );
+            font-family: 'Apple SD Gothic Neo', 'Nanum Gothic', 'Malgun Gothic', sans-serif;
+            background: var(--bg);
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding: 40px 20px;
-            color: var(--text-light);
+            padding: 0;
+            color: var(--text-dark);
+        }
+
+        /* 네이버 스타일 상단 헤더 */
+        .header {
+            width: 100%;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            height: 56px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .header-logo {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+
+        .header-logo span {
+            color: var(--text-dark);
         }
 
         .container {
             width: 100%;
-            max-width: 550px;
-            background: #1a1a1a;
-            border: 1px solid var(--primary);
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
-            padding: 0;
-            overflow: hidden;
-            letter-spacing: 1px;
+            max-width: 640px;
+            margin: 24px auto;
+            padding: 0 16px;
         }
 
-        h1 {
-            font-size: 38px;
-            font-weight: 300;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            text-align: center;
-            padding: 40px 24px 32px;
-            border-bottom: 2px solid var(--primary);
-            color: var(--primary);
-            word-spacing: 1000px;
+        /* 메모 입력 카드 */
+        .input-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
 
+        .input-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 14px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 14px;
+            min-height: 44px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input::placeholder {
+            color: var(--text-light);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(3, 199, 90, 0.12);
+        }
+
+        button {
+            padding: 11px 20px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 44px;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+
+        button:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+
+        button:active {
+            background: #029e47;
+        }
+
+        button:disabled {
+            background: #cccccc;
+            color: #888888;
+            cursor: not-allowed;
+        }
+
+        /* 상태 메시지 */
         .status {
             position: static !important;
             width: auto !important;
             height: auto !important;
-            padding: 14px 24px !important;
-            margin: 16px 24px 0 !important;
-            border: 1px solid var(--primary);
-            border-left: 3px solid var(--primary);
-            background: rgba(212, 175, 55, 0.08);
-            color: var(--primary);
-            font-size: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            padding: 10px 14px !important;
+            margin: 0 0 12px 0 !important;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-size: 13px;
             font-weight: 600;
             display: block !important;
             overflow: visible !important;
             clip: auto !important;
             white-space: normal !important;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .status.error {
-            background: rgba(255, 107, 107, 0.1);
-            color: #ff6b6b;
-            border-left-color: #ff6b6b;
+            background: #fff0f0;
+            color: #d93025;
+            border-color: #ffc9c9;
         }
 
         .status.success {
-            background: rgba(212, 175, 55, 0.1);
-            color: var(--primary);
-            border-left-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-color: #b2edce;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .input-group {
-            display: flex;
-            gap: 12px;
-            padding: 32px 24px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        input {
-            flex: 1;
-            padding: 14px 16px;
+        /* 메모 목록 섹션 */
+        .memos-section {
+            background: var(--white);
             border: 1px solid var(--border);
-            border-bottom: 2px solid var(--primary);
-            background: #0f0f0f;
-            color: var(--text-light);
-            font-family: 'Georgia', serif;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .memos-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--white);
+        }
+
+        .memos-header-title {
             font-size: 14px;
-            letter-spacing: 0.5px;
-            min-height: 44px;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            color: var(--text-dark);
         }
 
-        input::placeholder {
-            color: #666666;
-            letter-spacing: 0.5px;
-        }
-
-        input:focus {
-            outline: none;
-            border-bottom-color: var(--primary);
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
-            background: #1a1a1a;
-        }
-
-        button {
-            padding: 14px 28px;
-            background: var(--primary);
-            color: #000000;
-            border: none;
-            font-family: 'Georgia', serif;
+        .memos-count {
             font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            min-height: 44px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
-        }
-
-        button:hover:not(:disabled) {
-            background: #e5c158;
-            box-shadow: 0 6px 25px rgba(212, 175, 55, 0.4);
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            background: #555555;
-            color: #999999;
-            cursor: not-allowed;
-            opacity: 0.6;
-            box-shadow: none;
+            color: var(--text-light);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2px 10px;
         }
 
         .memos {
             display: flex;
             flex-direction: column;
-            gap: 0;
-            padding: 24px;
         }
 
         .memo {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 16px;
-            padding: 20px;
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--primary);
-            background: #0f0f0f;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-            position: relative;
+            gap: 12px;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--white);
+            transition: background 0.15s;
         }
 
-        .memo::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(to right, var(--primary), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
+        .memo:last-child {
+            border-bottom: none;
         }
 
         .memo:hover {
-            background: #1a1a1a;
-            border-left-color: #e5c158;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+            background: #fafafa;
         }
 
-        .memo:hover::after {
-            opacity: 1;
+        .memo-icon {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
         }
 
         .memo-text {
             flex: 1;
-            color: var(--text-light);
+            color: var(--text-dark);
             font-size: 14px;
-            letter-spacing: 0.5px;
             line-height: 1.6;
             word-break: break-word;
             overflow-wrap: break-word;
-            max-width: 100%;
         }
 
         .delete-btn {
             background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            padding: 8px 16px;
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.15s;
             white-space: nowrap;
-            min-height: 36px;
+            min-height: 30px;
             display: flex;
             align-items: center;
-            font-family: 'Georgia', serif;
+            font-family: inherit;
         }
 
         .delete-btn:hover {
-            background: var(--primary);
-            color: #000000;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            background: #fff0f0;
+            color: #d93025;
+            border-color: #ffc9c9;
         }
 
         .empty {
             text-align: center;
-            padding: 80px 40px;
-            color: #666666;
-            font-style: italic;
-            letter-spacing: 1px;
-            font-size: 16px;
+            padding: 60px 40px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.4;
         }
 
         /* 접근성: Screen reader only content */
@@ -276,12 +304,11 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.45);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            animation: fadeIn 0.3s ease-out;
         }
 
         .modal.show {
@@ -289,86 +316,69 @@
         }
 
         .modal-content {
-            background: #1a1a1a;
-            border: 2px solid var(--primary);
-            border-radius: 0;
-            padding: 40px 32px;
-            min-width: 320px;
-            max-width: 520px;
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
-            animation: slideUp 0.3s ease-out;
-            letter-spacing: 0.5px;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 28px 24px 20px;
+            min-width: 300px;
+            max-width: 380px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            animation: slideUp 0.2s ease-out;
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .modal-title {
-            font-size: 18px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            color: var(--primary);
-            margin-bottom: 12px;
-            text-transform: uppercase;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
         }
 
         .modal-text {
             font-size: 13px;
-            color: #999999;
-            margin-bottom: 32px;
-            line-height: 1.6;
-            letter-spacing: 0.5px;
+            color: var(--text-gray);
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
 
         .modal-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 12px;
+            gap: 8px;
         }
 
         .modal-actions button {
-            padding: 12px 24px;
-            font-size: 11px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
+            padding: 9px 20px;
+            font-size: 13px;
+            font-weight: 700;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            font-family: 'Georgia', serif;
+            transition: background 0.15s;
             min-height: auto;
             box-shadow: none;
         }
 
         .modal-actions .cancel-btn {
-            background: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
+            background: var(--bg);
+            color: var(--text-gray);
+            border: 1px solid var(--border);
         }
 
         .modal-actions .cancel-btn:hover {
-            background: var(--primary);
-            color: #000000;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+            background: #eeeeee;
         }
 
         .modal-actions .confirm-btn {
-            background: var(--primary);
-            color: #000000;
-            border: 1px solid var(--primary);
+            background: #d93025;
+            color: var(--white);
         }
 
         .modal-actions .confirm-btn:hover {
-            background: #e5c158;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            background: #c12a1f;
         }
 
         /* 접근성: 포커스 인디케이터 */
@@ -380,119 +390,87 @@
 
         /* 모바일 반응형 (480px 이하) */
         @media (max-width: 480px) {
-            body {
-                padding: 30px 16px;
-            }
-
             .container {
-                max-width: 100%;
-                border: 1px solid var(--primary);
+                padding: 0 12px;
+                margin: 16px auto;
             }
 
-            h1 {
-                font-size: 28px;
-                letter-spacing: 2px;
-                padding: 30px 20px 24px;
+            .input-card {
+                padding: 16px;
+                border-radius: 10px;
             }
 
             .input-group {
                 flex-direction: column;
-                padding: 24px 20px;
-                gap: 12px;
             }
 
             button {
                 width: 100%;
-                padding: 12px 16px;
             }
 
-            .memos {
-                padding: 20px;
+            .memos-section {
+                border-radius: 10px;
             }
 
             .memo {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-                padding: 16px;
+                padding: 14px 16px;
             }
 
-            .memo-text {
-                width: 100%;
-            }
-
-            .delete-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .status {
-                margin: 12px 16px 0;
-                padding: 12px 16px;
-                font-size: 11px;
-            }
-
-            .modal-content {
-                padding: 32px 24px;
-                max-width: calc(100vw - 32px);
-            }
-        }
-
-        /* 태블릿 반응형 (481px ~ 768px) */
-        @media (min-width: 481px) and (max-width: 768px) {
-            .container {
-                max-width: 95%;
-            }
-
-            h1 {
-                font-size: 32px;
+            .memos-header {
+                padding: 14px 16px;
             }
         }
 
         /* 데스크톱 (769px 이상) */
         @media (min-width: 769px) {
-            body {
-                padding: 60px 20px;
-            }
-
             .container {
-                max-width: 600px;
+                margin: 32px auto;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>메모</h1>
+    <!-- 네이버 스타일 상단 헤더 -->
+    <header class="header">
+        <span class="header-logo">MEMO<span>PAD</span></span>
+    </header>
 
-        <!-- 🎯 접근성: 상태 메시지 - role="alert" 추가 -->
+    <div class="container">
+        <!-- 상태 메시지 -->
         <output id="status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></output>
 
-        <div class="input-group">
-            <!-- 🎯 접근성: 입력창 레이블 추가 (화면 리더용) -->
-            <label for="memoInput" class="sr-only">메모 내용</label>
-            <input
-                type="text"
-                id="memoInput"
-                placeholder="메모 추가..."
-                autocomplete="off"
-                aria-describedby="memo-help"
-            >
-            <!-- 🎯 접근성: 도움말 텍스트 -->
-            <span id="memo-help" class="sr-only">메모를 입력하고 추가 버튼을 누르거나 Enter를 누르세요</span>
-
-            <button id="addBtn" aria-label="메모 추가">추가</button>
+        <!-- 메모 입력 카드 -->
+        <div class="input-card">
+            <div class="input-card-title">새 메모 작성</div>
+            <div class="input-group">
+                <label for="memoInput" class="sr-only">메모 내용</label>
+                <input
+                    type="text"
+                    id="memoInput"
+                    placeholder="메모를 입력하세요"
+                    autocomplete="off"
+                    aria-describedby="memo-help"
+                >
+                <span id="memo-help" class="sr-only">메모를 입력하고 추가 버튼을 누르거나 Enter를 누르세요</span>
+                <button id="addBtn" aria-label="메모 추가">등록</button>
+            </div>
         </div>
 
-        <!-- 🎯 접근성: 메모 목록 role 추가 -->
-        <div class="memos" id="memosList" role="list" aria-label="메모 목록"></div>
+        <!-- 메모 목록 섹션 -->
+        <div class="memos-section">
+            <div class="memos-header">
+                <span class="memos-header-title">메모 목록</span>
+                <span class="memos-count" id="memosCount">0개</span>
+            </div>
+            <div class="memos" id="memosList" role="list" aria-label="메모 목록"></div>
+        </div>
     </div>
 
-    <!-- 🎯 디자인: 삭제 확인 모달 -->
+    <!-- 삭제 확인 모달 -->
     <div class="modal" id="deleteModal">
         <div class="modal-content">
-            <div class="modal-title">메모를 삭제하시겠습니까?</div>
-            <div class="modal-text">이 작업은 되돌릴 수 없습니다.</div>
+            <div class="modal-title">메모 삭제</div>
+            <div class="modal-text">이 메모를 삭제하시겠습니까?<br>삭제한 메모는 복구할 수 없습니다.</div>
             <div class="modal-actions">
                 <button class="cancel-btn" id="cancelBtn">취소</button>
                 <button class="confirm-btn" id="confirmBtn">삭제</button>
@@ -515,7 +493,7 @@
         let sbClient = null;
         let memoList = [];
         let loading = false;
-        let pendingDeleteId = null;  // 🎯 디자인: 모달에서 삭제 대기 중인 ID
+        let pendingDeleteId = null;
 
         console.log('=== 메모 앱 시작 ===');
 
@@ -553,7 +531,7 @@
             }
         }
 
-        // 메시지 표시 (🎯 접근성: aria-live로 자동 알림)
+        // 메시지 표시
         function showStatus(msg, type) {
             statusDiv.innerHTML = msg;
             statusDiv.className = type;
@@ -589,20 +567,22 @@
 
         // 메모 목록 렌더링
         function renderList() {
+            const countEl = document.getElementById('memosCount');
+            if (countEl) countEl.textContent = memoList.length + '개';
+
             if (memoList.length === 0) {
-                memosList.innerHTML = '<div class="empty">메모가 없습니다</div>';
+                memosList.innerHTML = '<div class="empty"><div class="empty-icon">📝</div>등록된 메모가 없습니다</div>';
                 return;
             }
 
-            // 🎯 접근성: role="listitem" 추가
             memosList.innerHTML = memoList.map(item => `
                 <div class="memo" role="listitem">
+                    <div class="memo-icon"></div>
                     <span class="memo-text">${escapeHTML(item.content)}</span>
-                    <button class="delete-btn" data-id="${item.id}" aria-label="메모 삭제: ${escapeHTML(item.content).substring(0, 20)}...">삭제</button>
+                    <button class="delete-btn" data-id="${item.id}" aria-label="메모 삭제: ${escapeHTML(item.content).substring(0, 20)}">삭제</button>
                 </div>
             `).join('');
 
-            // 🎯 이벤트 위임: 모든 삭제 버튼에 리스너 추가
             memosList.querySelectorAll('.delete-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const id = parseInt(e.target.dataset.id);
@@ -620,7 +600,6 @@
 
             loading = true;
             addBtn.disabled = true;
-            // 🎯 로딩 상태 시각화
             const originalText = addBtn.textContent;
             addBtn.textContent = '추가 중...';
 
@@ -643,7 +622,6 @@
             } finally {
                 loading = false;
                 addBtn.disabled = false;
-                // 🎯 원래 텍스트로 복원
                 addBtn.textContent = originalText;
             }
         }
@@ -652,13 +630,12 @@
         function deleteMemoItem(id) {
             if (!sbClient || loading) return;
 
-            // 🎯 디자인: 모달 표시로 변경
             pendingDeleteId = id;
             const deleteModal = document.getElementById('deleteModal');
             deleteModal.classList.add('show');
         }
 
-        // 🎯 디자인: 실제 삭제 실행
+        // 실제 삭제 실행
         async function executeDelete() {
             if (!sbClient || loading || !pendingDeleteId) return;
 
@@ -696,7 +673,7 @@
             }
         }
 
-        // 🎯 디자인: 모달 열기/닫기
+        // 모달 닫기
         function hideDeleteModal() {
             const deleteModal = document.getElementById('deleteModal');
             deleteModal.classList.remove('show');
@@ -712,15 +689,13 @@
         // 이벤트 리스너
         addBtn.addEventListener('click', addMemo);
         memoInput.addEventListener('keypress', (e) => {
-            // 🎯 로딩 중에는 Enter 키 무시
             if (e.key === 'Enter' && !loading) addMemo();
         });
 
-        // 🎯 디자인: 모달 버튼 이벤트
+        // 모달 버튼 이벤트
         document.getElementById('cancelBtn').addEventListener('click', hideDeleteModal);
         document.getElementById('confirmBtn').addEventListener('click', executeDelete);
         document.getElementById('deleteModal').addEventListener('click', (e) => {
-            // 모달 배경 클릭 시 닫기
             if (e.target.id === 'deleteModal') hideDeleteModal();
         });
 
